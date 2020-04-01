@@ -21,15 +21,14 @@
     SOFTWARE.
 */
 
-#pragma config WDTE = OFF     /*disable Watchdog*/
-#pragma config LVP = ON  /* Low voltage programming enabled, RE3 pin is MCLR */
+/*disable Watchdog*/
+#pragma config WDTE = OFF
+/* Low voltage programming enabled, RE3 pin is MCLR */
+#pragma config LVP = ON  
 
 #include <xc.h>
 #include <stdint.h>
 
-/* channel that connects the ADCC to VSS */
-#define DISCHARGE_SAMPLE_CAP                0x3C  
-#define TEMPERATURE_CHANNEL                 0x3D
 #define VDD                                 3.3
 #define ADC_TO_CELSIUS(adcVal)              (int16_t) ((1241.4967 - VDD * (1024 - (adcVal))) / 2.70336)
 #define ADC_TO_FAHRENHEIT(adcVal)           (int16_t) ((((1241.4967 - VDD * (1024 - (adcVal))) / 2.70336) * 1.8) + 32)
@@ -47,59 +46,59 @@ int16_t volatile fahrenheitValue;
 static void CLK_init(void)
 {
     /* set HFINTOSC Oscillator */
-    OSCCON1 = _OSCCON1_NOSC1_MASK | _OSCCON1_NOSC2_MASK;
+    OSCCON1bits.NOSC = 6;
     /* set HFFRQ to 1 MHz */
-    OSCFRQ = ~_OSCFREQ_HFFRQ_MASK;
+    OSCFRQbits.HFFRQ = 0;
 }
-
 
 static void FVR_init(void)
 {
-    FVRCON |= _FVRCON_TSEN_MASK   /*enable temperature sensor*/
-            | _FVRCON_FVREN_MASK; /*enable FVR*/
+    /*Enable temperature sensor*/
+    FVRCONbits.TSEN = 1;
+    /*Enable FVR*/
+    FVRCONbits.FVREN = 1;
 }
 
 static void ADCC_init(void)
 {
-    ADCON0 = _ADCON0_ADON_MASK     /*Enable ADCC module*/
-           | _ADCON0_ADCS_MASK     /*Select FRC clock*/
-           | _ADCON0_ADFM_MASK;    /*result right justified*/
+    /* Enable the ADCC module */
+    ADCON0bits.ADON = 1; 
+    /* Select FRC clock */
+    ADCON0bits.ADCS = 1;
+    /* result right justified */
+    ADCON0bits.ADFM = 1;
 }
 
 static void ADCC_dischargeSampleCap(void)
 {
-    ADPCH = DISCHARGE_SAMPLE_CAP;
+    /*channel number that connects to VSS*/
+    ADPCH = 0x3C;
 }
 
 static uint16_t ADCC_readValue(uint8_t channel)
-{    
+{   
     ADPCH = channel;
-    
-    ADCON0 |= _ADCON0_ADGO_MASK; /*start conversion*/
-
-    while (ADCON0 & _ADCON0_ADGO_MASK)
+    /*start conversion*/
+    ADCON0bits.ADGO = 1;
+    while (ADCON0bits.ADGO)
     {
         ;
     }
-    
+        
     return ((uint16_t)((ADRESH << 8) + ADRESL));
 }
 
-void main(void) {
-  
-    CLK_init();
-    
+void main(void)
+{
+    CLK_init();   
     FVR_init();
-    
     ADCC_init();
-    
     ADCC_dischargeSampleCap();
     
-    adcVal = ADCC_readValue(TEMPERATURE_CHANNEL);
-    
+    /*channel number that connects to the temperature sensor*/
+    adcVal = ADCC_readValue(0x3D);
     celsiusValue = ADC_TO_CELSIUS(adcVal); 
-    fahrenheitValue = ADC_TO_FAHRENHEIT(adcVal);
-    
+    fahrenheitValue = ADC_TO_FAHRENHEIT(adcVal);    
     while(1)
     {
           ;
