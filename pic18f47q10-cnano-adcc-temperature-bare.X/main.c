@@ -30,20 +30,22 @@
 #include <stdint.h>
 
 #define VDD                                 3.3
-#define ADC_TO_CELSIUS(adcVal)              (int16_t) ((1241.4967 - VDD * (1024 - (adcVal))) / 2.70336)
-#define ADC_TO_FAHRENHEIT(adcVal)           (int16_t) ((((1241.4967 - VDD * (1024 - (adcVal))) / 2.70336) * 1.8) + 32)
+#define ADC_TO_CELSIUS(adcVal)              (int16_t) \
+                ((1241.4967 - VDD * (1024 - (adcVal))) / 2.70336)
+#define ADC_TO_FAHRENHEIT(adcVal)           (int16_t) \
+                ((((1241.4967 - VDD * (1024 - (adcVal))) / 2.70336) * 1.8) + 32)
 
-static void CLK_init(void);
-static void FVR_init(void);
-static void ADCC_init(void);
-static void ADCC_dischargeSampleCap(void);
-static uint16_t ADCC_readValue(uint8_t channel);
+static void CLK_Init(void);
+static void FVR_Init(void);
+static void ADCC_Init(void);
+static void ADCC_DischargeSampleCap(void);
+static uint16_t ADCC_ReadValue(uint8_t channel);
 
 uint16_t volatile adcVal;
 int16_t volatile celsiusValue;
 int16_t volatile fahrenheitValue; 
 
-static void CLK_init(void)
+static void CLK_Init(void)
 {
     /* set HFINTOSC Oscillator */
     OSCCON1bits.NOSC = 6;
@@ -51,7 +53,7 @@ static void CLK_init(void)
     OSCFRQbits.HFFRQ = 0;
 }
 
-static void FVR_init(void)
+static void FVR_Init(void)
 {
     /*Enable temperature sensor*/
     FVRCONbits.TSEN = 1;
@@ -59,7 +61,7 @@ static void FVR_init(void)
     FVRCONbits.FVREN = 1;
 }
 
-static void ADCC_init(void)
+static void ADCC_Init(void)
 {
     /* Enable the ADCC module */
     ADCON0bits.ADON = 1; 
@@ -69,13 +71,13 @@ static void ADCC_init(void)
     ADCON0bits.ADFM = 1;
 }
 
-static void ADCC_dischargeSampleCap(void)
+static void ADCC_DischargeSampleCap(void)
 {
     /*channel number that connects to VSS*/
     ADPCH = 0x3C;
 }
 
-static uint16_t ADCC_readValue(uint8_t channel)
+static uint16_t ADCC_ReadValue(uint8_t channel)
 {   
     ADPCH = channel;
     /*start conversion*/
@@ -90,13 +92,13 @@ static uint16_t ADCC_readValue(uint8_t channel)
 
 void main(void)
 {
-    CLK_init();   
-    FVR_init();
-    ADCC_init();
-    ADCC_dischargeSampleCap();
+    CLK_Init();   
+    FVR_Init();
+    ADCC_Init();
+    ADCC_DischargeSampleCap();
     
     /*channel number that connects to the temperature sensor*/
-    adcVal = ADCC_readValue(0x3D);
+    adcVal = ADCC_ReadValue(0x3D);
     celsiusValue = ADC_TO_CELSIUS(adcVal); 
     fahrenheitValue = ADC_TO_FAHRENHEIT(adcVal);    
     while(1)
