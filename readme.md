@@ -19,19 +19,9 @@ In this demo, the ADCC peripheral is used to read a value from the internal temp
 
 ## Hardware Used
 - PIC18F47Q10 Curiosity Nano [(DM182029)](https://www.microchip.com/Developmenttools/ProductDetails/DM182029)
-- Curiosity Nano Base for Click boards™ [(AC164162)](https://www.microchip.com/Developmenttools/ProductDetails/AC164162)
-- POT Click board™ [(MIKROE-3402)](https://www.mikroe.com/pot-click)
 
 ## Setup
-The PIC18F47Q10 Curiosity Nano Development Board is used as test platform, along with the Curiosity Nano Base for Click boards™ and the POT Click board™.
-
-The following configurations must be made for this project:
-
-| Pin           | Configuration      |
-| :----------: | :----------------: |
-| RA0           | Analog Input       |
-
-<img src="images/HWsetup.png" alt="Hardware Setup" width="480"/>
+The PIC18F47Q10 Curiosity Nano Development Board is used as test platform.
 
 ## Operation:
 Run the code with a debugger, stop it and check the value of the variable to see the result. 
